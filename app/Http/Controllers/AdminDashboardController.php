@@ -10,86 +10,79 @@ use Illuminate\Http\Request;
 class AdminDashboardController extends Controller
 {
     public function index()
-    {
-        // 1. Hitung Statistik
-        $hariIni = Carbon::today()->toDateString();
-        $bookingHariIni = Booking::where('tanggal_main', $hariIni)
-            ->where('status', '!=', 'dibatalkan')
-            ->count();
-        $bookingPending = Booking::where('status', 'pending')->count();
+{
+    // 1. Hitung Statistik Dasar
+    $hariIni = Carbon::today()->toDateString();
+    $bookingHariIni = Booking::where('tanggal_main', $hariIni)
+        ->where('status', '!=', 'dibatalkan')
+        ->count();
+    $bookingPending = Booking::where('status', 'pending')->count();
 
-        // 2. Siapkan wadah laporan mingguan (7 hari terakhir)
-        $laporanMingguan = [];
-        $kamusHari = [
-            'Sunday' => 'Minggu',
-            'Monday' => 'Senin',
-            'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu',
-            'Thursday' => 'Kamis',
-            'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu'
-        ];
+    // 2. Ambil Semua Booking yang Disetujui
+    $bookingDisetujui = Booking::whereIn('status', ['disetujui', 'Disetujui', 'APPROVED'])->get();
 
-        for ($i = 6; $i >= 0; $i--) {
-            $tanggalObj = Carbon::today()->subDays($i);
-            $formatTanggal = $tanggalObj->toDateString();
-            $namaHariIndo = $kamusHari[$tanggalObj->format('l')];
+    // Hitung Total Pendapatan berdasarkan Durasi Jam (Rp 30.000 / jam) atau total_harga
+    $totalPendapatan = 0;
+    $pendapatanHariIni = 0;
+    $pendapatanBulanIni = 0;
 
-            $laporanMingguan[$formatTanggal] = [
-                'hari' => $namaHariIndo . ' (' . $tanggalObj->format('d/m') . ')',
-                'omzet' => 0
-            ];
-        }
-
-        // 3. Hitung pendapatan mingguan (7 hari terakhir, status disetujui)
-        $tujuhHariLalu = Carbon::today()->subDays(7)->toDateString();
-        $bookingDisetujuiMingguIni = Booking::where('status', 'disetujui')
-            ->whereBetween('tanggal_main', [$tujuhHariLalu, $hariIni])
-            ->get();
-
-        $pendapatanMingguan = 0;
-        $maxOmzetHarian = 30000;
-
-        foreach ($bookingDisetujuiMingguIni as $b) {
-            // Hitung durasi jam bermain
+    foreach ($bookingDisetujui as $b) {
+        // Jika ada kolom total_harga gunakan itu, jika tidak ada hitung dari durasi jam
+        if (isset($b->total_harga) && $b->total_harga > 0) {
+            $harga = $b->total_harga;
+        } else {
             $mulai = Carbon::parse($b->jam_mulai);
             $selesai = Carbon::parse($b->jam_selesai);
-            $durasiJam = $mulai->diffInHours($selesai);
-            $totalBayar = $durasiJam * 30000;
-
-            // Akumulasi pendapatan
-            $pendapatanMingguan += $totalBayar;
-
-            // Masukkan ke laporan harian yang sesuai
-            if (isset($laporanMingguan[$b->tanggal_main])) {
-                $laporanMingguan[$b->tanggal_main]['omzet'] += $totalBayar;
-
-                // Update omzet tertinggi untuk skala grafik
-                if ($laporanMingguan[$b->tanggal_main]['omzet'] > $maxOmzetHarian) {
-                    $maxOmzetHarian = $laporanMingguan[$b->tanggal_main]['omzet'];
-                }
-            }
+            $durasi = max(1, $mulai->diffInHours($selesai));
+            $harga = $durasi * 30000;
         }
 
-        // 4. Ambil semua data booking (urutan terbaru di atas)
-        $allBookings = Booking::orderBy('created_at', 'desc')->get();
+        // Akumulasi Total Semua
+        $totalPendapatan += $harga;
 
-        // 5. Ambil data tanggal libur mendatang
-        $daftarLibur = ClosedDate::where('tanggal', '>=', now()->toDateString())
-            ->orderBy('tanggal', 'asc')
-            ->get();
+        // Cek jika main Hari Ini
+        if (Carbon::parse($b->tanggal_main)->isToday()) {
+            $pendapatanHariIni += $harga;
+        }
 
-        // Return view dengan semua data
-        return view('dashboard', compact(
-            'bookingHariIni',
-            'bookingPending',
-            'pendapatanMingguan',
-            'laporanMingguan',
-            'maxOmzetHarian',
-            'allBookings',
-            'daftarLibur',
-        ));
+        // Cek jika main Bulan Ini
+        if (Carbon::parse($b->tanggal_main)->isCurrentMonth()) {
+            $pendapatanBulanIni += $harga;
+        }
     }
+
+    // 3. Rekap Bulanan untuk Tabel (Gunakan format aman)
+    $rekapBulanan = Booking::whereIn('status', ['disetujui', 'Disetujui', 'APPROVED'])
+        ->selectRaw('MONTH(tanggal_main) as bulan_num, MONTHNAME(tanggal_main) as bulan, COUNT(*) as total_booking')
+        ->groupBy('bulan_num', 'bulan')
+        ->orderBy('bulan_num', 'asc')
+        ->get();
+
+    // 4. Data Pendukung Lainnya
+    $allBookings = Booking::orderBy('created_at', 'desc')->get();
+    $daftarLibur = ClosedDate::where('tanggal', '>=', now()->toDateString())
+        ->orderBy('tanggal', 'asc')
+        ->get();
+
+    // Variabel cadangan (biar Blade tidak crash kalau masih ada sisa kode grafik)
+    $laporanMingguan = [];
+    $pendapatanMingguan = $pendapatanBulanIni;
+    $maxOmzetHarian = 30000;
+
+    return view('dashboard', compact(
+        'bookingHariIni',
+        'bookingPending',
+        'pendapatanHariIni',
+        'pendapatanBulanIni',
+        'totalPendapatan',
+        'rekapBulanan',
+        'allBookings',
+        'daftarLibur',
+        'laporanMingguan',
+        'pendapatanMingguan',
+        'maxOmzetHarian'
+    ));
+}
 
     // Aksi untuk Menyetujui Booking
     public function setujui($id)

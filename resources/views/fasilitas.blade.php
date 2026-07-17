@@ -7,38 +7,61 @@
         <p class="text-gray-600">Kami menyediakan fasilitas terbaik demi kenyamanan dan kepuasan bertanding Anda bersama teman maupun komunitas.</p>
     </div>
 
+    <!-- Cuma butuh 1 pembungkus grid di paling luar -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+
+        <!-- KARTU 1: Lapangan -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-            <div class="h-64 bg-indigo-200 flex items-center justify-center text-6xl">🏸</div> 
+            <img
+                src="{{ asset('img/download.jpg') }}"
+                alt="1 Lapangan Standar"
+                class="w-full h-64 object-cover" />
+
             <div class="p-6">
                 <h3 class="text-xl font-bold mb-2">1 Lapangan Standar</h3>
                 <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
             </div>
         </div>
 
+        <!-- KARTU 2: Tempat Parkir (Dimasukkan ke sini, dalam grid yang sama) -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-            <div class="h-64 bg-amber-100 flex items-center justify-center text-6xl">🚿</div>
+            <img
+                src="{{ asset('img/download.jpg') }}"
+                alt="Tempat Parkir"
+                class="w-full h-64 object-cover" />
+
             <div class="p-6">
-                <h3 class="text-xl font-bold mb-2">Kamar Mandi & Ruang Ganti Clean</h3>
-                <p class="text-gray-600">Tersedia kamar mandi yang bersih dan nyaman untuk bilas atau berganti pakaian sebelum dan sesudah berolahraga.</p>
+                <h3 class="text-xl font-bold mb-2">Tempat Parkir</h3>
+                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-            <div class="h-64 bg-teal-100 flex items-center justify-center text-6xl">🕌</div>
+            <!-- Ganti emoji dengan elemen gambar ini -->
+            <img
+                src="{{ asset('img/download.jpg') }}"
+                alt="1 Lapangan Standar"
+                class="w-full h-64 object-cover" />
+
             <div class="p-6">
-                <h3 class="text-xl font-bold mb-2">Musholla Terpisah</h3>
-                <p class="text-gray-600">Bagi Anda yang bermain di waktu shalat, kami menyediakan ruang ibadah yang tenang.</p>
+                <h3 class="text-xl font-bold mb-2">Kantin</h3>
+                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-            <div class="h-64 bg-orange-100 flex items-center justify-center text-6xl">🥤</div>
+            <!-- Ganti emoji dengan elemen gambar ini -->
+            <img
+                src="{{ asset('img/download.jpg') }}"
+                alt="1 Lapangan Standar"
+                class="w-full h-64 object-cover" />
+
             <div class="p-6">
-                <h3 class="text-xl font-bold mb-2">Kantin & Rest Area</h3>
-                <p class="text-gray-600">Kehabisan minum atau butuh energi tambahan? Kantin kami menyediakan berbagai minuman dingin, makanan ringan, hingga kok (*shuttlecock*) cadangan.</p>
+                <h3 class="text-xl font-bold mb-2">Toilet</h3>
+                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
             </div>
         </div>
     </div>
-</div>
+</div> <!-- Tag penutup grid cukup 1 saja di akhir -->
+
 @endsection

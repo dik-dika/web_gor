@@ -47,56 +47,75 @@
             </div>
 
             <!-- Revenue Chart -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border border-gray-200">
-                <div class="mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">Laporan Grafik Pendapatan (7 Hari Terakhir)</h3>
-                    <p class="text-xs text-gray-500">
-                        Analisis performa omzet harian berdasarkan pesanan lapangan yang telah disetujui.
-                    </p>
-                </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-8">
+    <!-- Header Bagian -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-lg font-bold text-gray-800">Ringkasan Pendapatan GOR</h2>
+            <p class="text-xs text-gray-500">Laporan keuangannya rapi dan langsung kelihatan angkanya</p>
+        </div>
+        <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
+            💰 Laporan Keuangan
+        </span>
+    </div>
 
-                <div class="space-y-4">
-                    @foreach($laporanMingguan as $tgl => $data)
-                    @php
-                    // PENGAMAN: Jika $maxOmzetHarian kosong/tidak terkirim, gunakan angka default 30000 agar tidak memicu error
-                    $maxOmzet = $maxOmzetHarian ?? 30000;
-                    $persentaseBar = $maxOmzet > 0 ? ($data['omzet'] / $maxOmzet) * 100 : 0;
-                    @endphp
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                        <div class="w-32 text-xs font-bold text-gray-600">
-                            {{ $data['hari'] }}
-                        </div>
+    <!-- 1. Ringkasan Angka Utama (Stat Cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <!-- Hari Ini -->
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+            <p class="text-xs font-medium text-indigo-600 uppercase tracking-wider">Pendapatan Hari Ini</p>
+            <h3 class="text-2xl font-bold text-indigo-900 mt-1">
+                Rp {{ number_format($pendapatanHariIni ?? 0, 0, ',', '.') }}
+            </h3>
+        </div>
 
-                        <div class="flex-grow flex items-center gap-3">
-                            <div class="flex-grow bg-gray-100 rounded-full h-6 overflow-hidden flex items-center shadow-inner">
-                                @if($data['omzet'] > 0)
-                                <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-full rounded-full transition-all duration-500"
-                                    style="width: {{ $persentaseBar }}%;">
-                                </div>
-                                @else
-                                <div class="w-full text-left px-3 text-[10px] text-gray-400 font-medium italic">
-                                    Tidak ada pemasukan (Rp 0)
-                                </div>
-                                @endif
-                            </div>
+        <!-- Bulan Ini -->
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+            <p class="text-xs font-medium text-emerald-600 uppercase tracking-wider">Pendapatan Bulan Ini</p>
+            <h3 class="text-2xl font-bold text-emerald-900 mt-1">
+                Rp {{ number_format($pendapatanBulanIni ?? 0, 0, ',', '.') }}
+            </h3>
+        </div>
 
-                            @if($data['omzet'] > 0)
-                            <div class="w-24 text-right text-xs font-bold text-emerald-700 whitespace-nowrap">
-                                Rp {{ number_format($data['omzet'], 0, ',', '.') }}
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+        <!-- Total Keseluruhan -->
+        <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+            <p class="text-xs font-medium text-amber-600 uppercase tracking-wider">Total Semua Transaksi</p>
+            <h3 class="text-2xl font-bold text-amber-900 mt-1">
+                Rp {{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}
+            </h3>
+        </div>
+    </div>
 
-                <div class="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-500 font-medium">
-                    <span>*Grafik di atas terupdate otomatis setiap kali admin menekan tombol 🟢 Setujui.</span>
-                    <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-1 rounded whitespace-nowrap">
-                        Total Seminggu: Rp {{ number_format($pendapatanMingguan, 0, ',', '.') }}
-                    </span>
-                </div>
-            </div>
+    <!-- 2. Tabel Rincian Pendapatan Bulanan -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-600 border border-gray-100 rounded-lg overflow-hidden">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="px-4 py-3">Bulan</th>
+                    <th class="px-4 py-3">Jumlah Booking</th>
+                    <th class="px-4 py-3 text-right">Total Pendapatan</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse($rekapBulanan ?? [] as $data)
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-semibold text-gray-800">{{ $data->bulan }}</td>
+                    <td class="px-4 py-3">{{ $data->total_booking }} Transaksi</td>
+                    <td class="px-4 py-3 text-right font-bold text-emerald-600">
+                        Rp {{ number_format($data->total_uang, 0, ',', '.') }}
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="3" class="px-4 py-6 text-center text-gray-400">
+                        Belum ada data pendapatan yang tercatat.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
             <!-- Booking Management Table -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border border-gray-200">
@@ -246,8 +265,8 @@
                             </label>
                         </div>
 
-                        <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 rounded-lg text-xs shadow transition">
-                            🚨 TETAP PAKSA KUNCI TANGGAL
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">
+                            🚨TETAP PAKSA KUNCI TANGGAL
                         </button>
                         <a href="{{ route('dashboard') }}" class="block text-center text-xs font-semibold text-gray-500 hover:text-gray-700 mt-2 hover:underline">
                             Batalkan Penguncian
