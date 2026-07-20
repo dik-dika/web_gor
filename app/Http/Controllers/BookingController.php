@@ -60,6 +60,7 @@ class BookingController extends Controller
         // [LANGKAH 4] Jika lolos cek libur & bentrok, baru simpan ke database
         Booking::create([
             'nama_pelanggan' => $request->nama_pelanggan,
+            'tipe_pelanggan' => $request->tipe_pelanggan ?? 'non-member', // Default ke non-member jika tidak diisi
             'no_whatsapp'    => $request->no_whatsapp,
             'nomor_lapangan' => 1,
             'tanggal_main'   => $request->tanggal_main,

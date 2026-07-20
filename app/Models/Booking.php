@@ -12,6 +12,7 @@ class Booking extends Model
     // Kolom yang boleh diisi secara massal
     protected $fillable = [
         'nama_pelanggan',
+        'tipe_pelanggan',
         'no_whatsapp',
         'nomor_lapangan',
         'tanggal_main',
