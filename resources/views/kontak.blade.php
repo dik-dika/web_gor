@@ -24,10 +24,7 @@
                 </a>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h4 class="font-bold text-indigo-900 mb-1">📸 Media Sosial</h4>
-                <p class="text-gray-600 text-sm">Instagram: @gor.radenganda</p>
-            </div>
+            
         </div>
 
         <div class="lg:col-span-2 h-96 lg:h-auto min-h-[350px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

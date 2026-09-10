@@ -13,52 +13,52 @@
         <!-- KARTU 1: Lapangan -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <img
-                src="{{ asset('img/download.jpg') }}"
+                src="{{ asset('img/lapang.jpeg') }}"
                 alt="1 Lapangan Standar"
                 class="w-full h-64 object-cover" />
 
             <div class="p-6">
-                <h3 class="text-xl font-bold mb-2">1 Lapangan Standar</h3>
-                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
+                <h3 class="text-xl font-bold mb-2">Lapangan</h3>
+                <p class="text-gray-600">Lapangan non karpet standar</p>
             </div>
         </div>
 
         <!-- KARTU 2: Tempat Parkir (Dimasukkan ke sini, dalam grid yang sama) -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <img
-                src="{{ asset('img/download.jpg') }}"
+                src="{{ asset('img/parkir.jpeg') }}"
                 alt="Tempat Parkir"
                 class="w-full h-64 object-cover" />
 
             <div class="p-6">
                 <h3 class="text-xl font-bold mb-2">Tempat Parkir</h3>
-                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
+                <p class="text-gray-600">Tempat parkir yang luas dan aman untuk kendaraan Anda.</p>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <!-- Ganti emoji dengan elemen gambar ini -->
             <img
-                src="{{ asset('img/download.jpg') }}"
+                src="{{ asset('img/parkir.jpeg') }}"
                 alt="1 Lapangan Standar"
                 class="w-full h-64 object-cover" />
 
             <div class="p-6">
                 <h3 class="text-xl font-bold mb-2">Kantin</h3>
-                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
+                <p class="text-gray-600">Kantin yang nyaman dan menyediakan berbagai macam makanan dan minuman.</p>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <!-- Ganti emoji dengan elemen gambar ini -->
             <img
-                src="{{ asset('img/download.jpg') }}"
+                src="{{ asset('img/toilet.jpeg') }}"
                 alt="1 Lapangan Standar"
                 class="w-full h-64 object-cover" />
 
             <div class="p-6">
                 <h3 class="text-xl font-bold mb-2">Toilet</h3>
-                <p class="text-gray-600">Lantai dilapisi karpet vinyl berkualitas tinggi yang empuk, tidak licin, dan standar turnamen untuk menjaga keamanan sendi Anda saat melakukan *jumping smash*.</p>
+                <p class="text-gray-600">Toilet yang bersih dan nyaman untuk kenyamanan Anda.</p>
             </div>
         </div>
     </div>

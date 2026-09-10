@@ -13,79 +13,95 @@ class AdminDashboardController extends Controller
     {
         // 1. Hitung Statistik Dasar
         $hariIni = Carbon::today()->toDateString();
-        // Gunakan whereDate untuk memastikan perbandingan tanggal tepat
         $bookingHariIni = Booking::whereDate('tanggal_main', $hariIni)
             ->where('status', '!=', 'dibatalkan')
             ->count();
         $bookingPending = Booking::where('status', 'pending')->count();
 
-        // 2. Ambil Semua Booking yang Disetujui
-        $bookingDisetujui = Booking::whereIn('status', ['disetujui', 'Disetujui', 'APPROVED'])->get();
+        // 2. AMBIL DATA BERDASARKAN STATUS
+        // A. Booking Lunas / Selesai -> Untuk Keuangan
+        $bookingLunas = Booking::whereIn('status', ['selesai', 'lunas'])->get();
 
-        // Inisialisasi variabel statistik
+        // B. Booking Aktif -> Untuk Rekap Jumlah Transaksi Bulanan
+        $bookingAktif = Booking::whereIn('status', ['disetujui', 'Disetujui', 'APPROVED', 'selesai', 'lunas'])->get();
+
+        // Inisialisasi variabel statistik keuangan
         $totalPendapatan = 0;
         $pendapatanHariIni = 0;
         $pendapatanBulanIni = 0;
 
-        // Wadah untuk menampung olahan rekap bulanan secara akurat
-        $rekapBulananRaw = [];
-
-        foreach ($bookingDisetujui as $b) {
-            // Gunakan strtolower untuk mengantisipasi tulisan 'Member' atau 'MEMBER'
-            if (strtolower($b->tipe_pelanggan) === 'member') {
+        // ------------------------------------------------------------------
+        // 3. PROSES LAPORAN PENDAPATAN (HANYA DARI BOOKING YANG SUDAH LUNAS / SELESAI)
+        // ------------------------------------------------------------------
+        foreach ($bookingLunas as $b) {
+            // Jika member, nominal omzet tetap 0
+            if (trim(strtolower($b->tipe_pelanggan)) === 'member') {
                 $harga = 0;
             } else {
-                // Jika non-member, hitung normal seperti biasa
-                if (isset($b->total_harga) && $b->total_harga > 0) {
-                    $harga = $b->total_harga;
-                } else {
-                    $mulai = Carbon::parse($b->jam_mulai);
-                    $selesai = Carbon::parse($b->jam_selesai);
+                // 2. Jika total_harga kosong atau 0, hitung otomatis berdasarkan jam
+                if (!$b->total_harga || $b->total_harga == 0) {
+                    $mulai = \Carbon\Carbon::parse($b->jam_mulai);
+                    $selesai = \Carbon\Carbon::parse($b->jam_selesai);
                     $durasi = max(1, $mulai->diffInHours($selesai));
                     $harga = $durasi * 30000;
+                } else {
+                    $harga = $b->total_harga;
                 }
             }
 
-            // Akumulasi Total Stat Cards
+            // Akumulasi Total Uang Masuk
             $totalPendapatan += $harga;
 
-            if (Carbon::parse($b->tanggal_main)->isToday()) {
+            if (\Carbon\Carbon::parse($b->tanggal_main)->isToday()) {
                 $pendapatanHariIni += $harga;
             }
 
-            if (Carbon::parse($b->tanggal_main)->isCurrentMonth()) {
+            if (\Carbon\Carbon::parse($b->tanggal_main)->isCurrentMonth()) {
                 $pendapatanBulanIni += $harga;
             }
+        }
 
-            // PROSES REKAP BULANAN (SINKRON DENGAN LOGIKA MEMBER)
-            $bulanKey = Carbon::parse($b->tanggal_main)->format('F'); // Contoh: "July"
-            $bulanNum = Carbon::parse($b->tanggal_main)->format('m');
+        // ------------------------------------------------------------------
+        // 4. PROSES REKAP BULANAN (REKAP JUMLAH TRANSAKSI & OMZET BULANAN)
+        // ------------------------------------------------------------------
+        $rekapBulananRaw = [];
+
+        foreach ($bookingAktif as $b) {
+            // Gunakan format "Bulan Tahun" (Contoh: "July 2026") agar rapi saat berganti tahun
+            $bulanKey = Carbon::parse($b->tanggal_main)->translatedFormat('F Y');
+            $sortKey  = Carbon::parse($b->tanggal_main)->format('Ym'); // Urutan tahun + bulan (misal: 202607)
+
+            $hargaRekap = (strtolower($b->tipe_pelanggan) === 'member') ? 0 : ($b->total_harga ?? 0);
 
             if (!isset($rekapBulananRaw[$bulanKey])) {
                 $rekapBulananRaw[$bulanKey] = [
                     'bulan' => $bulanKey,
                     'total_booking' => 0,
                     'total_uang' => 0,
-                    'bulan_num' => $bulanNum
+                    'sort_key' => $sortKey
                 ];
             }
 
             $rekapBulananRaw[$bulanKey]['total_booking'] += 1;
-            $rekapBulananRaw[$bulanKey]['total_uang'] += $harga; // Menambahkan nominal asli (0 jika member)
+
+            // Hanya tambahkan uang ke rekap bulanan jika statusnya sudah selesai/lunas
+            if (in_array(strtolower($b->status), ['selesai', 'lunas'])) {
+                $rekapBulananRaw[$bulanKey]['total_uang'] += $hargaRekap;
+            }
         }
 
-        // Ubah format array menjadi collection object agar Blade tidak eror saat looping
+        // Ubah format ke Collection Object & urutkan dari bulan terbaru ke lama
         $rekapBulanan = collect($rekapBulananRaw)->map(function ($item) {
             return (object) $item;
-        })->sortBy('bulan_num');
+        })->sortByDesc('sort_key');
 
-        // 4. Data Pendukung Lainnya
+        // 5. Data Pendukung Lainnya
         $allBookings = Booking::orderBy('created_at', 'desc')->get();
         $daftarLibur = ClosedDate::where('tanggal', '>=', now()->toDateString())
             ->orderBy('tanggal', 'asc')
             ->get();
 
-        // Variabel cadangan agar template grafis tidak crash
+        // Variabel cadangan
         $laporanMingguan = [];
         $pendapatanMingguan = $pendapatanBulanIni;
         $maxOmzetHarian = 30000;
@@ -105,12 +121,11 @@ class AdminDashboardController extends Controller
         ));
     }
 
-    // Aksi untuk Menyetujui Booking
+    // Aksi untuk Menyetujui Booking (Jadwal Terkunci)
     public function setujui($id)
     {
         $booking = Booking::findOrFail($id);
 
-        // Antisipasi perbedaan kapitalisasi huruf
         if (strtolower($booking->tipe_pelanggan) === 'member') {
             $hargaFinal = 0;
         } else {
@@ -125,7 +140,35 @@ class AdminDashboardController extends Controller
             'total_harga' => $hargaFinal
         ]);
 
-        return back()->with('success', 'Booking berhasil disetujui!');
+        return back()->with('success', 'Booking berhasil disetujui! Jadwal telah terkunci.');
+    }
+
+    // Aksi untuk Pelunasan / Selesai Bermain (Uang Masuk Kas)
+    public function selesai($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        // Perhitungan ulang harga jika total_harga di database masih 0/null saat ditandai selesai
+        if (strtolower($booking->tipe_pelanggan) === 'member') {
+            $hargaFinal = 0;
+        } else {
+            if (!$booking->total_harga || $booking->total_harga == 0) {
+                $mulai = Carbon::parse($booking->jam_mulai);
+                $selesai = Carbon::parse($booking->jam_selesai);
+                $durasi = max(1, $mulai->diffInHours($selesai));
+                $hargaFinal = $durasi * 30000;
+            } else {
+                $hargaFinal = $booking->total_harga;
+            }
+        }
+
+        // Update status dan simpan total harga secara pasti
+        $booking->update([
+            'status' => 'selesai',
+            'total_harga' => $hargaFinal
+        ]);
+
+        return redirect()->back()->with('success', 'Booking berhasil ditandai selesai dan masuk ke laporan!');
     }
 
     // Aksi untuk Membatalkan Booking
@@ -144,22 +187,19 @@ class AdminDashboardController extends Controller
             'alasan' => 'required|string|max:255',
         ]);
 
-        // 🔍 LANGKAH PENGAMAN: Cek apakah ada booking aktif (belum dibatalkan) di tanggal tersebut
         $jumlahBookingBentrok = Booking::where('tanggal_main', $request->tanggal)
             ->where('status', '!=', 'dibatalkan')
             ->count();
 
-        // Jika ada booking DAN pemilik belum mencentang konfirmasi paksa
         if ($jumlahBookingBentrok > 0 && !$request->has('paksa_tutup')) {
             return back()
-                ->withInput() // Mempertahankan isi tanggal & alasan yang tadi diketik
+                ->withInput()
                 ->with('warning_booking_exist', [
                     'jumlah' => $jumlahBookingBentrok,
                     'tanggal' => date('d M Y', strtotime($request->tanggal))
                 ]);
         }
 
-        // Jika tidak ada booking ATAU pemilik sudah setuju mencentang "paksa_tutup"
         ClosedDate::create([
             'tanggal' => $request->tanggal,
             'alasan' => $request->alasan,
