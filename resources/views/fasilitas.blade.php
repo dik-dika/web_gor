@@ -39,13 +39,13 @@
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <!-- Ganti emoji dengan elemen gambar ini -->
             <img
-                src="{{ asset('img/parkir.jpeg') }}"
-                alt="1 Lapangan Standar"
+                src="{{ asset('img/kantin.jpeg') }}"
+                alt="Kantin"
                 class="w-full h-64 object-cover" />
 
             <div class="p-6">
                 <h3 class="text-xl font-bold mb-2">Kantin</h3>
-                <p class="text-gray-600">Kantin yang nyaman dan menyediakan berbagai macam makanan dan minuman.</p>
+                <p class="text-gray-600">Kantin yang menyediakan berbagai macam makanan dan minuman.</p>
             </div>
         </div>
 

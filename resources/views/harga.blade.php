@@ -21,22 +21,22 @@
                     <th class="p-4 font-bold text-gray-700 text-right">Tarif / Jam</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
-                <tr>
-                    <td class="p-4 font-low" rowspan="2">Senin - Minggu </td>
-                    <td class="p-4 text-gray-600"> 08.00 - 23.00</td>
-                    <td class="p-4 text-right font-bold text-indigo-600">Rp 30.000</td>
-                </tr>
-            </tbody>
             <thead>
-                <tr class="bg-gray-100 border-b border-gray-200">
+                <tr>
+                    <th class="p-4 font-bold text-gray-700">Senin - Minggu</th>
+                    <th class="p-4 text-gray-700"> 08:00 - 23:00</th>
+                    <th class="p-4 font-bold text-gray-700 text-right text-indigo-600">Rp 30.000</th>
+                </tr>
+            </thead>
+            <thead>
+                <tr>
                     <th class="p-4 font-bold text-gray-700">Member</th>
                     <th class="p-4 text-gray-700">3jam / Minggu</th>
                     <th class="p-4 font-bold text-gray-700 text-right text-indigo-600">Rp 200.000</th>
                 </tr>
             </thead>
             <thead>
-                <tr class="bg-gray-100 border-b border-gray-200">
+                <tr>
                     <th class="p-4 font-bold text-gray-700">Member</th>
                     <th class="p-4 text-gray-700">5jam / Minggu</th>
                     <th class="p-4 font-bold text-gray-700 text-right text-indigo-600">Rp 250.000</th>

@@ -147,14 +147,6 @@
                         </div>
                     @endif
                 </div>
-
-                <div class="mt-6 text-xs text-gray-400 bg-gray-50 p-3 rounded-lg leading-relaxed">
-                    * Jadwal di atas diperbarui secara *real-time*. Jika status masih <span
-                        class="text-amber-600 font-semibold">pending</span>, jam tersebut sudah di-tag namun menunggu
-                    transfer pembayaran dikonfirmasi oleh pemilik GOR.
-                </div>
-            </div>
-
         </div>
     </div>
 @endsection
