@@ -70,15 +70,30 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jam Mulai</label>
-                                <input type="time" name="jam_mulai" value="{{ old('jam_mulai') }}" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jam Selesai</label>
-                                <input type="time" name="jam_selesai" value="{{ old('jam_selesai') }}" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
-                            </div>
+    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jam Mulai</label>
+    <select name="jam_mulai" class="w-full text-sm border-gray-300 rounded-md shadow-sm" required>
+        <option value="">Pilih Jam Mulai</option>
+        @for ($hour = 8; $hour <= 22; $hour++)
+            @php $time = sprintf('%02d:00', $hour); @endphp
+            <option value="{{ $time }}" {{ old('jam_mulai') == $time ? 'selected' : '' }}>
+                {{ $time }} WIB
+            </option>
+        @endfor
+    </select>
+</div>
+
+<div>
+    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jam Selesai</label>
+    <select name="jam_selesai" class="w-full text-sm border-gray-300 rounded-md shadow-sm" required>
+        <option value="">Pilih Jam Selesai</option>
+        @for ($hour = 9; $hour <= 23; $hour++)
+            @php $time = sprintf('%02d:00', $hour); @endphp
+            <option value="{{ $time }}" {{ old('jam_selesai') == $time ? 'selected' : '' }}>
+                {{ $time }} WIB
+            </option>
+        @endfor
+    </select>
+</div>
                         </div>
 
                         <button type="submit"

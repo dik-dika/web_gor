@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController as BreezeProfileController;
 use Illuminate\Support\Facades\Route;
@@ -26,47 +27,48 @@ Route::get('/kontak', function () {
     return view('kontak');
 })->name('kontak');
 
-
 /*
 |--------------------------------------------------------------------------
-| 2. RUTE BOOKING MANDIRI (Sisi Pelanggan - Tanpa Login)
+| 2. RUTE BOOKING MANDIRI (Sisi Pelanggan)
 |--------------------------------------------------------------------------
 */
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
-
 /*
 |--------------------------------------------------------------------------
-| 3. RUTE DASHBOARD PEMILIK (Diproteksi Auth Breeze)
+| 3. RUTE DASHBOARD & ADMIN (Diproteksi Auth & Verified)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Halaman Utama Dasbor GOR
+    // Dashboard Utama
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Aksi Persetujuan & Status Booking
-    Route::post('/admin/booking/{id}/setujui', [AdminDashboardController::class, 'setujui'])->name('admin.booking.setujui');
-    Route::post('/admin/booking/{id}/batalkan', [AdminDashboardController::class, 'batalkan'])->name('admin.booking.batalkan');
-    Route::post('/admin/booking/{id}/selesai', [AdminDashboardController::class, 'selesai'])->name('admin.booking.selesai');
-    
-    // Hapus Pesanan Lapangan
-    Route::delete('/admin/booking/{id}', [AdminDashboardController::class, 'destroy'])->name('admin.booking.destroy');
+    // Grouping Khusus Fitur Admin (/admin/...)
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Status & Aksi Booking
+        Route::post('/booking/{id}/setujui', [AdminDashboardController::class, 'setujui'])->name('booking.setujui');
+        Route::post('/booking/{id}/batalkan', [AdminDashboardController::class, 'batalkan'])->name('booking.batalkan');
+        Route::post('/booking/{id}/selesai', [AdminDashboardController::class, 'selesai'])->name('booking.selesai');
+        Route::delete('/booking/{id}', [AdminDashboardController::class, 'destroy'])->name('booking.destroy');
 
-    // Manajemen Tanggal Libur GOR
-    Route::post('/admin/libur', [AdminDashboardController::class, 'storeLibur'])->name('admin.libur.store');
-    Route::delete('/admin/libur/{id}', [AdminDashboardController::class, 'destroyLibur'])->name('admin.libur.destroy');
+        // Manajemen Tanggal Libur GOR
+        Route::post('/libur', [AdminDashboardController::class, 'storeLibur'])->name('libur.store');
+        Route::delete('/libur/{id}', [AdminDashboardController::class, 'destroyLibur'])->name('libur.destroy');
 
-    // Rute Edit Akun Admin Bawaan Breeze
+        // Laporan Pendapatan
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    });
+
+    // Profile Admin/User (Pastikan tidak duplikat dengan auth.php)
     Route::get('/profile', [BreezeProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [BreezeProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [BreezeProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| 4. RUTE OTOMATIS LOGIN & REGISTER BREEZE
+| 4. RUTE OTOMATIS AUTH BREEZE
 |--------------------------------------------------------------------------
 */
 require __DIR__ . '/auth.php';

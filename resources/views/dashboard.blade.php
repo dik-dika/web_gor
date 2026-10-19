@@ -50,46 +50,7 @@
                 </div>
             </div>
 
-            <!-- Revenue Chart & Summary -->
-            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-8">
-                <!-- Header Bagian -->
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800">Ringkasan Pendapatan GOR</h2>
-                        <p class="text-xs text-gray-500">Laporan keuangannya rapi dan langsung kelihatan angkanya</p>
-                    </div>
-                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
-                        💰 Laporan Keuangan
-                    </span>
-                </div>
-
-                <!-- Ringkasan Angka Utama -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-                        <p class="text-xs font-medium text-indigo-600 uppercase tracking-wider">Pendapatan Hari Ini</p>
-                        <h3 class="text-2xl font-bold text-indigo-900 mt-1">
-                            Rp {{ number_format($pendapatanHariIni ?? 0, 0, ',', '.') }}
-                        </h3>
-                    </div>
-
-                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
-                        <p class="text-xs font-medium text-emerald-600 uppercase tracking-wider">Pendapatan Bulan Ini
-                        </p>
-                        <h3 class="text-2xl font-bold text-emerald-900 mt-1">
-                            Rp {{ number_format($pendapatanBulanIni ?? 0, 0, ',', '.') }}
-                        </h3>
-                    </div>
-
-                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
-                        <p class="text-xs font-medium text-amber-600 uppercase tracking-wider">Total Semua Transaksi</p>
-                        <h3 class="text-2xl font-bold text-amber-900 mt-1">
-                            Rp {{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}
-                        </h3>
-                    </div>
-                </div>
-
-
-            </div>
+           
 
             <!-- Booking Management Table -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border border-gray-200">

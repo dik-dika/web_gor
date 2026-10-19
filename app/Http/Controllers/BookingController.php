@@ -17,9 +17,16 @@ class BookingController extends Controller
         // Cek apakah tanggal ini terdaftar sebagai hari libur
         $infoLibur = ClosedDate::where('tanggal', $tanggalTerpilih)->first();
 
-        // Ambil semua booking yang aktif (tidak dibatalkan) pada tanggal tersebut
+        // Ambil semua booking yang aktif pada tanggal tersebut:
+        // Yaitu status 'disetujui'/'selesai' ATAU status 'pending' yang belum kadaluarsa (masih dalam 30 menit)
         $bookings = Booking::where('tanggal_main', $tanggalTerpilih)
-            ->where('status', '!=', 'dibatalkan')
+            ->where(function ($q) {
+                $q->whereIn('status', ['disetujui', 'selesai'])
+                  ->orWhere(function ($sub) {
+                      $sub->where('status', 'pending')
+                          ->where('created_at', '>=', now()->subMinutes(30));
+                  });
+            })
             ->orderBy('jam_mulai', 'asc')
             ->get();
 
@@ -38,15 +45,23 @@ class BookingController extends Controller
             'jam_selesai'    => 'required|after:jam_mulai',
         ]);
 
-        // [LANGKAH 2] Pengaman Backend: Cek apakah tanggal ini libur (WAJIB DI ATAS)
+        // [LANGKAH 2] Pengaman Backend: Cek apakah tanggal ini libur
         $isLibur = ClosedDate::where('tanggal', $request->tanggal_main)->exists();
         if ($isLibur) {
             return back()->withInput()->with('error', 'Maaf, GOR Raden Ganda sedang tidak beroperasi (Tutup) pada tanggal tersebut.');
         }
 
-        // [LANGKAH 3] LOGIKA ANTI-BENTROK: Cek apakah jam tersebut sudah di-booking orang lain
+        // [LANGKAH 3] LOGIKA ANTI-BENTROK + ANTI-ISENG (EXPIRED 30 MENIT)
+        // Jadwal dianggap bentrok HANYA JIKA:
+        // Statusnya disetujui/selesai ATAU pending tapi masih dalam kurun waktu 30 menit terakhir.
         $jadwalBentrok = Booking::where('tanggal_main', $request->tanggal_main)
-            ->where('status', '!=', 'dibatalkan')
+            ->where(function ($q) {
+                $q->whereIn('status', ['disetujui', 'selesai'])
+                  ->orWhere(function ($sub) {
+                      $sub->where('status', 'pending')
+                          ->where('created_at', '>=', now()->subMinutes(30));
+                  });
+            })
             ->where(function ($query) use ($request) {
                 $query->where('jam_mulai', '<', $request->jam_selesai)
                     ->where('jam_selesai', '>', $request->jam_mulai);
@@ -57,19 +72,30 @@ class BookingController extends Controller
             return back()->withInput()->with('error', 'Maaf, lapangan sudah dipesan pada jam tersebut. Silakan pilih jam atau tanggal lain.');
         }
 
-        // [LANGKAH 4] Jika lolos cek libur & bentrok, baru simpan ke database
+        // Cek apakah nomor WA ini punya pesanan pending yang MASIH AKTIF (< 30 menit)
+        $existingPending = Booking::where('no_whatsapp', $request->no_whatsapp)
+            ->where('status', 'pending')
+            ->where('created_at', '>=', now()->subMinutes(30))
+            ->exists();
+
+        if ($existingPending) {
+            return back()->withInput()->with('error', 'Anda masih memiliki pesanan pending yang belum dikonfirmasi/DP! Silakan selesaikan transaksi sebelumnya terlebih dahulu.');
+        }
+
+        // [LANGKAH 4] Simpan ke Database
         Booking::create([
             'nama_pelanggan' => $request->nama_pelanggan,
-            'tipe_pelanggan' => $request->tipe_pelanggan ?? 'non-member', // Default ke non-member jika tidak diisi
+            'tipe_pelanggan' => $request->tipe_pelanggan ?? 'non-member',
             'no_whatsapp'    => $request->no_whatsapp,
             'nomor_lapangan' => 1,
             'tanggal_main'   => $request->tanggal_main,
             'jam_mulai'      => $request->jam_mulai,
             'jam_selesai'    => $request->jam_selesai,
-            'status'         => 'pending' // Menunggu verifikasi pemilik
+            'status'         => 'pending',
+            'expired_at'     => now()->addMinutes(30) // Menyimpan jam expired untuk referensi
         ]);
-        
-        // [LANGKAH 5] Return sukses diletakkan di paling bawah luar IF
-        return redirect()->route('booking.create')->with('success', 'Booking berhasil diajukan! Silakan tunggu konfirmasi admin.');
+
+        // [LANGKAH 5] Return sukses
+        return redirect()->route('booking.create')->with('success', 'Booking berhasil diajukan! Silakan melakukan transfer DP dan kirim bukti via WA dalam waktu 30 menit.');
     }
 }
