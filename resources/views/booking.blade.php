@@ -4,6 +4,7 @@
     <div class="container mx-auto px-6 py-12 max-w-6xl">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
+            <!-- Form Booking -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-md p-6 border border-gray-100 h-fit">
                 <h2 class="text-xl font-bold text-indigo-900 mb-6">Form Booking Lapangan</h2>
 
@@ -40,18 +41,31 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
                         </div>
 
-                        <!-- 🎯 TAMBAHKAN DROPDOWN PILIHAN TIPE PELANGGAN DI SINI -->
+                        <!-- 🎯 PILIHAN TIPE PELANGGAN / MEMBER -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Status Keanggotaan</label>
-                            <select name="tipe_pelanggan" required
+                            <select name="tipe_pelanggan" id="tipe_pelanggan" required onchange="toggleHargaMember()"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm bg-white">
                                 <option value="non-member" {{ old('tipe_pelanggan') == 'non-member' ? 'selected' : '' }}>
-                                    Umum / Non-Member (Tarif Rp 30.000/jam)</option>
-                                <option value="member" {{ old('tipe_pelanggan') == 'member' ? 'selected' : '' }}>Member
-                                    Aktif GOR (Bebas Biaya Per Jam)</option>
+                                    Umum / Non-Member (Tarif Rp 30.000/jam)
+                                </option>
+                                <option value="member" {{ old('tipe_pelanggan') == 'member' ? 'selected' : '' }}>
+                                    Member Aktif GOR (Paket Bulanan / Sesi)
+                                </option>
                             </select>
-                            <p class="mt-1 text-xs text-gray-400 italic">*Status member akan diverifikasi kembali oleh pemilik
-                                saat menyetujui pesanan.</p>
+                        </div>
+
+                        <!-- Opsi Paket Member (Muncul jika tipe_pelanggan = member) -->
+                        <div id="wrapper_paket_member" class="hidden p-3 bg-indigo-50 border border-indigo-100 rounded-lg space-y-2">
+                            <label class="block text-xs font-semibold text-indigo-900 uppercase">Pilih Paket Member:</label>
+                            <select name="paket_member" id="paket_member" onchange="updateHargaMember()"
+                                class="w-full px-3 py-1.5 border border-indigo-300 rounded-md text-xs bg-white focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="50000">Paket 200rb/bulan (3 Jam/minggu) → Rp 50.000 / Sesi</option>
+                                <option value="62500">Paket 250rb/bulan (5 Jam/minggu) → Rp 62.500 / Sesi</option>
+                            </select>
+                            <!-- Input hidden untuk mengirim nilai total_harga otomatis ke backend -->
+                            <input type="hidden" name="total_harga" id="total_harga_member" value="50000">
+                            <p class="text-[11px] text-indigo-600 italic">Tarif per pertemuan ini akan otomatis masuk ke laporan rekap bulanan.</p>
                         </div>
 
                         <div>
@@ -70,30 +84,30 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jam Mulai</label>
-    <select name="jam_mulai" class="w-full text-sm border-gray-300 rounded-md shadow-sm" required>
-        <option value="">Pilih Jam Mulai</option>
-        @for ($hour = 8; $hour <= 22; $hour++)
-            @php $time = sprintf('%02d:00', $hour); @endphp
-            <option value="{{ $time }}" {{ old('jam_mulai') == $time ? 'selected' : '' }}>
-                {{ $time }} WIB
-            </option>
-        @endfor
-    </select>
-</div>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jam Mulai</label>
+                                <select name="jam_mulai" class="w-full text-sm border-gray-300 rounded-md shadow-sm" required>
+                                    <option value="">Pilih Jam Mulai</option>
+                                    @for ($hour = 8; $hour <= 22; $hour++)
+                                        @php $time = sprintf('%02d:00', $hour); @endphp
+                                        <option value="{{ $time }}" {{ old('jam_mulai') == $time ? 'selected' : '' }}>
+                                            {{ $time }} WIB
+                                        </option>
+                                    @endfor
+                                </select>
+                            </div>
 
-<div>
-    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jam Selesai</label>
-    <select name="jam_selesai" class="w-full text-sm border-gray-300 rounded-md shadow-sm" required>
-        <option value="">Pilih Jam Selesai</option>
-        @for ($hour = 9; $hour <= 23; $hour++)
-            @php $time = sprintf('%02d:00', $hour); @endphp
-            <option value="{{ $time }}" {{ old('jam_selesai') == $time ? 'selected' : '' }}>
-                {{ $time }} WIB
-            </option>
-        @endfor
-    </select>
-</div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jam Selesai</label>
+                                <select name="jam_selesai" class="w-full text-sm border-gray-300 rounded-md shadow-sm" required>
+                                    <option value="">Pilih Jam Selesai</option>
+                                    @for ($hour = 9; $hour <= 23; $hour++)
+                                        @php $time = sprintf('%02d:00', $hour); @endphp
+                                        <option value="{{ $time }}" {{ old('jam_selesai') == $time ? 'selected' : '' }}>
+                                            {{ $time }} WIB
+                                        </option>
+                                    @endfor
+                                </select>
+                            </div>
                         </div>
 
                         <button type="submit"
@@ -104,6 +118,7 @@
                 @endif
             </div>
 
+            <!-- Status Ketersediaan Lapangan (Sisi Kanan) -->
             <div class="lg:col-span-7 bg-white rounded-xl shadow-md p-6 border border-gray-100">
                 <div
                     class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 mb-6 gap-4">
@@ -154,7 +169,7 @@
                                         </div>
                                     </div>
                                     <span
-                                        class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-800 font-medium capitalized">
+                                        class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-800 font-medium capitalize">
                                         {{ $book->status }}
                                     </span>
                                 </div>
@@ -162,6 +177,37 @@
                         </div>
                     @endif
                 </div>
+            </div>
+
         </div>
     </div>
+
+    <!-- Script Pendukung untuk Toggle Paket Member -->
+    <script>
+        function toggleHargaMember() {
+            const tipePelanggan = document.getElementById('tipe_pelanggan').value;
+            const wrapperPaket = document.getElementById('wrapper_paket_member');
+            
+            if (tipePelanggan === 'member') {
+                wrapperPaket.classList.remove('hidden');
+                updateHargaMember();
+            } else {
+                wrapperPaket.classList.add('hidden');
+                document.getElementById('total_harga_member').value = 0;
+            }
+        }
+
+        function updateHargaMember() {
+            const selectedPaket = document.getElementById('paket_member').value;
+            document.getElementById('total_harga_member').value = selectedPaket;
+        }
+
+        // Jalankan saat halaman dimuat jika error validation mengembalikan pilihan 'member'
+        document.addEventListener("DOMContentLoaded", function() {
+            if(document.getElementById('tipe_pelanggan').value === 'member') {
+                document.getElementById('wrapper_paket_member').classList.remove('hidden');
+                updateHargaMember();
+            }
+        });
+    </script>
 @endsection

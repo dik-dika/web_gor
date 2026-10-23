@@ -14,12 +14,18 @@
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="{{ route('home') }}" class="text-xl font-bold tracking-wider">GOR RADEN GANDA</a>
             <div class="space-x-6 flex items-center">
-                <a href="{{ route('home') }}" class="hover:text-amber-400 transition text-sm">Beranda</a>
-                <a href="{{ route('fasilitas') }}" class="hover:text-amber-400 transition text-sm">Fasilitas</a>
-                <a href="{{ route('harga') }}" class="hover:text-amber-400 transition text-sm">Harga</a>
-                <a href="{{ route('kontak') }}" class="hover:text-amber-400 transition text-sm">Kontak</a>
-                <a href="{{ route('booking.create') }}" class="bg-amber-500 text-indigo-950 font-bold px-4 py-2 rounded text-sm hover:bg-amber-400 transition">Booking Lapangan</a>
-            </div>
+                <!-- Menu Beranda -->
+                <a href="{{ route('home') }}" class="text-sm transition pb-1 border-b-2 {{ request()->routeIs('home') ? 'text-amber-400 font-semibold border-amber-400' : 'border-transparent hover:text-amber-400' }}">Beranda</a>
+                
+                <!-- Menu Fasilitas -->
+                <a href="{{ route('fasilitas') }}" class="text-sm transition pb-1 border-b-2 {{ request()->routeIs('fasilitas') ? 'text-amber-400 font-semibold border-amber-400' : 'border-transparent hover:text-amber-400' }}">Fasilitas</a>
+                
+                <!-- Menu Harga -->
+                <a href="{{ route('harga') }}" class="text-sm transition pb-1 border-b-2 {{ request()->routeIs('harga') ? 'text-amber-400 font-semibold border-amber-400' : 'border-transparent hover:text-amber-400' }}">Harga</a>
+                
+                <!-- Menu Kontak -->
+                <a href="{{ route('kontak') }}" class="text-sm transition pb-1 border-b-2 {{ request()->routeIs('kontak') ? 'text-amber-400 font-semibold border-amber-400' : 'border-transparent hover:text-amber-400' }}">Kontak</a>
+                
         </div>
     </nav>
 
